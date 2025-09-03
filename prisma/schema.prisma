@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  password      String
+  name          String
+  role          Role     @default(USER)
+  emailVerified Boolean  @default(false)
+  emailToken    String?
+  mfaEnabled    Boolean  @default(false)
+  mfaSecret     String?
+  batches       Batch[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("users")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+model Batch {
+  id          String     @id @default(cuid())
+  name        String
+  status      BatchStatus @default(IN_PROGRESS)
+  startDate   DateTime
+  endDate     DateTime?
+  notes       String?
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expenses    Expense[]
+  earnings    Earning[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@map("batches")
+}
+
+enum BatchStatus {
+  IN_PROGRESS
+  SOLD
+  COMPLETED
+  CANCELLED
+}
+
+model Expense {
+  id          String      @id @default(cuid())
+  itemName    String
+  quantity    Float
+  costPerUnit Float
+  total       Float
+  category    ExpenseCategory
+  isRecurring Boolean     @default(false)
+  receipt     String?     // URL to uploaded receipt
+  batchId     String
+  batch       Batch       @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@map("expenses")
+}
+
+enum ExpenseCategory {
+  FEED
+  VACCINES
+  EQUIPMENT
+  MISCELLANEOUS
+}
+
+model Earning {
+  id          String      @id @default(cuid())
+  itemName    String
+  quantity    Float
+  amountPerUnit Float
+  total       Float
+  category    EarningCategory
+  batchId     String
+  batch       Batch       @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@map("earnings")
+}
+
+enum EarningCategory {
+  CHICKEN_SALES
+  EGG_SALES
+  BY_PRODUCTS
+}
