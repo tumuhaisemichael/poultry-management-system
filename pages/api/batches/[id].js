@@ -1,6 +1,8 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]";
-import { prisma } from "../../../lib/database";  // Fixed path
+import { prisma } from "../../../lib/database";
+
+
 
 export default async function handler(req, res) {
   const session = await getServerSession(req, res, authOptions);
@@ -9,12 +11,15 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
+  const { id } = req.query;
+
   if (req.method === "GET") {
     try {
-      let batches;
+      let batch;
       if (session.user.role === "ADMIN") {
-        batches = await prisma.batch.findMany({
+        batch = await prisma.batch.findUnique({
           where: {
+            id,
             user: {
               id: session.user.id,
             },
@@ -22,49 +27,43 @@ export default async function handler(req, res) {
           include: {
             expenses: true,
             earnings: true,
-          },
-          orderBy: {
-            createdAt: "desc",
+            user: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
           },
         });
       } else {
-        batches = await prisma.batch.findMany({
+        batch = await prisma.batch.findUnique({
           where: {
+            id,
             userId: session.user.id,
           },
           include: {
             expenses: true,
             earnings: true,
-          },
-          orderBy: {
-            createdAt: "desc",
+            user: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
           },
         });
       }
 
-      res.status(200).json(batches);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  } else if (req.method === "POST") {
-    try {
-      const { name, startDate, notes } = req.body;
+      if (!batch) {
+        return res.status(404).json({ error: "Batch not found" });
+      }
 
-      const batch = await prisma.batch.create({
-        data: {
-          name,
-          startDate: new Date(startDate),
-          notes,
-          userId: session.user.id,
-        },
-      });
-
-      res.status(201).json(batch);
+      res.status(200).json(batch);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
   } else {
-    res.setHeader("Allow", ["GET", "POST"]);
+    res.setHeader("Allow", ["GET"]);
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }

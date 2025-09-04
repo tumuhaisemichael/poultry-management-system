@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { prisma } from "../../../lib/database";  // Fixed path
-import { verifyPassword } from "../../../lib/auth";  // Fixed path
+import { prisma } from "../../../lib/database";
+import { verifyPassword } from "../../../lib/auth";
 
 export const authOptions = {
   session: {
@@ -24,7 +24,7 @@ export const authOptions = {
           });
 
           if (!user) {
-            throw new Error("No user found with this email!");
+            throw new Error("No user found with this email");
           }
 
           // Verify password
@@ -34,10 +34,10 @@ export const authOptions = {
           );
 
           if (!isValid) {
-            throw new Error("Invalid password!");
+            throw new Error("Invalid password");
           }
 
-          // Return user object (will be stored in JWT token)
+          // Return user object without password
           return {
             id: user.id,
             email: user.email,
@@ -53,7 +53,6 @@ export const authOptions = {
   ],
   callbacks: {
     jwt: async ({ token, user }) => {
-      // Add role to token when user signs in
       if (user) {
         token.role = user.role;
         token.id = user.id;
@@ -61,7 +60,6 @@ export const authOptions = {
       return token;
     },
     session: async ({ session, token }) => {
-      // Add role to session object
       if (token) {
         session.user.role = token.role;
         session.user.id = token.id;
@@ -70,8 +68,8 @@ export const authOptions = {
     },
   },
   pages: {
-    signIn: "/auth/signin",  // Custom sign-in page
-    error: "/auth/error",    // Custom error page
+    signIn: "/auth/signin",
+    signUp: "/auth/register",
   },
 };
 

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
@@ -41,7 +42,10 @@ export default function SignIn() {
             Sign in to your account
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Use admin@example.com / password123 for testing
+            Or{" "}
+            <Link href="/auth/register" className="font-medium text-blue-600 hover:text-blue-500">
+              create a new account
+            </Link>
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>

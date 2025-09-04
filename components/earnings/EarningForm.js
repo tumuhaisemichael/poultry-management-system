@@ -1,13 +1,12 @@
 import { useState } from "react";
 
-export default function ExpenseForm({ batchId, onExpenseAdded }) {
+export default function EarningForm({ batchId, onEarningAdded }) {
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({
     itemName: "",
     quantity: 1,
-    costPerUnit: 0,
-    category: "FEED",
-    isRecurring: false,
+    amountPerUnit: 0,
+    category: "CHICKEN_SALES",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -18,34 +17,33 @@ export default function ExpenseForm({ batchId, onExpenseAdded }) {
     setError("");
 
     try {
-      const total = formData.quantity * formData.costPerUnit;
-      const expenseData = { ...formData, total, batchId };
+      const total = formData.quantity * formData.amountPerUnit;
+      const earningData = { ...formData, total, batchId };
 
-      const res = await fetch("/api/expenses", {
+      const res = await fetch("/api/earnings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(expenseData),
+        body: JSON.stringify(earningData),
       });
 
       if (res.ok) {
-        const newExpense = await res.json();
-        onExpenseAdded(newExpense);
+        const newEarning = await res.json();
+        onEarningAdded(newEarning);
         setFormData({
           itemName: "",
           quantity: 1,
-          costPerUnit: 0,
-          category: "FEED",
-          isRecurring: false,
+          amountPerUnit: 0,
+          category: "CHICKEN_SALES",
         });
         setIsOpen(false);
       } else {
         const data = await res.json();
-        setError(data.error || "Failed to add expense");
+        setError(data.error || "Failed to add earning");
       }
     } catch (error) {
-      setError("An error occurred while adding expense");
+      setError("An error occurred while adding earning");
     } finally {
       setIsLoading(false);
     }
@@ -55,12 +53,12 @@ export default function ExpenseForm({ batchId, onExpenseAdded }) {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+        className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
         </svg>
-        Add Expense
+        Add Earning
       </button>
     );
   }
@@ -69,7 +67,7 @@ export default function ExpenseForm({ batchId, onExpenseAdded }) {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-gray-800">Add New Expense</h2>
+          <h2 className="text-xl font-bold text-gray-800">Add New Earning</h2>
           <button
             onClick={() => setIsOpen(false)}
             className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -118,7 +116,7 @@ export default function ExpenseForm({ batchId, onExpenseAdded }) {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Cost Per Unit *
+                Amount Per Unit *
               </label>
               <input
                 type="number"
@@ -126,8 +124,8 @@ export default function ExpenseForm({ batchId, onExpenseAdded }) {
                 step="0.01"
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                value={formData.costPerUnit}
-                onChange={(e) => setFormData({ ...formData, costPerUnit: parseFloat(e.target.value) || 0 })}
+                value={formData.amountPerUnit}
+                onChange={(e) => setFormData({ ...formData, amountPerUnit: parseFloat(e.target.value) || 0 })}
               />
             </div>
           </div>
@@ -141,24 +139,10 @@ export default function ExpenseForm({ batchId, onExpenseAdded }) {
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
             >
-              <option value="FEED">Feed</option>
-              <option value="VACCINES">Vaccines</option>
-              <option value="EQUIPMENT">Equipment</option>
-              <option value="MISCELLANEOUS">Miscellaneous</option>
+              <option value="CHICKEN_SALES">Chicken Sales</option>
+              <option value="EGG_SALES">Egg Sales</option>
+              <option value="BY_PRODUCTS">By-products</option>
             </select>
-          </div>
-
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="recurring"
-              className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              checked={formData.isRecurring}
-              onChange={(e) => setFormData({ ...formData, isRecurring: e.target.checked })}
-            />
-            <label htmlFor="recurring" className="text-sm text-gray-700">
-              Recurring Expense
-            </label>
           </div>
 
           <div className="flex justify-end gap-3 pt-4">
@@ -172,9 +156,9 @@ export default function ExpenseForm({ batchId, onExpenseAdded }) {
             <button
               type="submit"
               disabled={isLoading}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg disabled:opacity-50 transition-colors"
+              className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg disabled:opacity-50 transition-colors"
             >
-              {isLoading ? "Adding..." : "Add Expense"}
+              {isLoading ? "Adding..." : "Add Earning"}
             </button>
           </div>
         </form>
