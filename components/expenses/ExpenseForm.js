@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-export default function ExpenseForm({ batchId, onExpenseAdded }) {
+export default function ExpenseForm({ batchId, onExpenseAdded, onExpenseUpdated, expenseToEdit = null }) {
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({
     itemName: "",
@@ -12,6 +12,20 @@ export default function ExpenseForm({ batchId, onExpenseAdded }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Pre-fill form when editing an existing expense
+  useEffect(() => {
+    if (expenseToEdit) {
+      setFormData({
+        itemName: expenseToEdit.itemName,
+        quantity: expenseToEdit.quantity,
+        costPerUnit: expenseToEdit.costPerUnit,
+        category: expenseToEdit.category,
+        isRecurring: expenseToEdit.isRecurring,
+      });
+      setIsOpen(true);
+    }
+  }, [expenseToEdit]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -21,17 +35,34 @@ export default function ExpenseForm({ batchId, onExpenseAdded }) {
       const total = formData.quantity * formData.costPerUnit;
       const expenseData = { ...formData, total, batchId };
 
-      const res = await fetch("/api/expenses", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(expenseData),
-      });
+      let res;
+      if (expenseToEdit) {
+        // Update existing expense
+        res = await fetch(`/api/expenses/${expenseToEdit.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(expenseData),
+        });
+      } else {
+        // Create new expense
+        res = await fetch("/api/expenses", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(expenseData),
+        });
+      }
 
       if (res.ok) {
-        const newExpense = await res.json();
-        onExpenseAdded(newExpense);
+        const expense = await res.json();
+        if (expenseToEdit) {
+          onExpenseUpdated(expense);
+        } else {
+          onExpenseAdded(expense);
+        }
         setFormData({
           itemName: "",
           quantity: 1,
@@ -42,16 +73,27 @@ export default function ExpenseForm({ batchId, onExpenseAdded }) {
         setIsOpen(false);
       } else {
         const data = await res.json();
-        setError(data.error || "Failed to add expense");
+        setError(data.error || "Failed to save expense");
       }
     } catch (error) {
-      setError("An error occurred while adding expense");
+      setError("An error occurred while saving expense");
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (!isOpen) {
+  const handleClose = () => {
+    setIsOpen(false);
+    setFormData({
+      itemName: "",
+      quantity: 1,
+      costPerUnit: 0,
+      category: "FEED",
+      isRecurring: false,
+    });
+  };
+
+  if (!isOpen && !expenseToEdit) {
     return (
       <button
         onClick={() => setIsOpen(true)}
@@ -69,9 +111,11 @@ export default function ExpenseForm({ batchId, onExpenseAdded }) {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-gray-800">Add New Expense</h2>
+          <h2 className="text-xl font-bold text-gray-800">
+            {expenseToEdit ? "Edit Expense" : "Add New Expense"}
+          </h2>
           <button
-            onClick={() => setIsOpen(false)}
+            onClick={handleClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -164,7 +208,7 @@ export default function ExpenseForm({ batchId, onExpenseAdded }) {
           <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
-              onClick={() => setIsOpen(false)}
+              onClick={handleClose}
               className="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg transition-colors"
             >
               Cancel
@@ -174,7 +218,7 @@ export default function ExpenseForm({ batchId, onExpenseAdded }) {
               disabled={isLoading}
               className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg disabled:opacity-50 transition-colors"
             >
-              {isLoading ? "Adding..." : "Add Expense"}
+              {isLoading ? "Saving..." : expenseToEdit ? "Update Expense" : "Add Expense"}
             </button>
           </div>
         </form>

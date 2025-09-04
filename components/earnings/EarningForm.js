@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-export default function EarningForm({ batchId, onEarningAdded }) {
+export default function EarningForm({ batchId, onEarningAdded, onEarningUpdated, earningToEdit = null }) {
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({
     itemName: "",
@@ -11,6 +11,19 @@ export default function EarningForm({ batchId, onEarningAdded }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Pre-fill form when editing an existing earning
+  useEffect(() => {
+    if (earningToEdit) {
+      setFormData({
+        itemName: earningToEdit.itemName,
+        quantity: earningToEdit.quantity,
+        amountPerUnit: earningToEdit.amountPerUnit,
+        category: earningToEdit.category,
+      });
+      setIsOpen(true);
+    }
+  }, [earningToEdit]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -20,17 +33,34 @@ export default function EarningForm({ batchId, onEarningAdded }) {
       const total = formData.quantity * formData.amountPerUnit;
       const earningData = { ...formData, total, batchId };
 
-      const res = await fetch("/api/earnings", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(earningData),
-      });
+      let res;
+      if (earningToEdit) {
+        // Update existing earning
+        res = await fetch(`/api/earnings/${earningToEdit.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(earningData),
+        });
+      } else {
+        // Create new earning
+        res = await fetch("/api/earnings", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(earningData),
+        });
+      }
 
       if (res.ok) {
-        const newEarning = await res.json();
-        onEarningAdded(newEarning);
+        const earning = await res.json();
+        if (earningToEdit) {
+          onEarningUpdated(earning);
+        } else {
+          onEarningAdded(earning);
+        }
         setFormData({
           itemName: "",
           quantity: 1,
@@ -40,16 +70,26 @@ export default function EarningForm({ batchId, onEarningAdded }) {
         setIsOpen(false);
       } else {
         const data = await res.json();
-        setError(data.error || "Failed to add earning");
+        setError(data.error || "Failed to save earning");
       }
     } catch (error) {
-      setError("An error occurred while adding earning");
+      setError("An error occurred while saving earning");
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (!isOpen) {
+  const handleClose = () => {
+    setIsOpen(false);
+    setFormData({
+      itemName: "",
+      quantity: 1,
+      amountPerUnit: 0,
+      category: "CHICKEN_SALES",
+    });
+  };
+
+  if (!isOpen && !earningToEdit) {
     return (
       <button
         onClick={() => setIsOpen(true)}
@@ -67,9 +107,11 @@ export default function EarningForm({ batchId, onEarningAdded }) {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-gray-800">Add New Earning</h2>
+          <h2 className="text-xl font-bold text-gray-800">
+            {earningToEdit ? "Edit Earning" : "Add New Earning"}
+          </h2>
           <button
-            onClick={() => setIsOpen(false)}
+            onClick={handleClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -148,7 +190,7 @@ export default function EarningForm({ batchId, onEarningAdded }) {
           <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
-              onClick={() => setIsOpen(false)}
+              onClick={handleClose}
               className="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg transition-colors"
             >
               Cancel
@@ -158,7 +200,7 @@ export default function EarningForm({ batchId, onEarningAdded }) {
               disabled={isLoading}
               className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg disabled:opacity-50 transition-colors"
             >
-              {isLoading ? "Adding..." : "Add Earning"}
+              {isLoading ? "Saving..." : earningToEdit ? "Update Earning" : "Add Earning"}
             </button>
           </div>
         </form>

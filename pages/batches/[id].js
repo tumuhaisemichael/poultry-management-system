@@ -14,6 +14,34 @@ export default function BatchDetail() {
   const router = useRouter();
   const { id } = router.query;
 
+  // Add these state variables at the top of your component
+const [editingExpense, setEditingExpense] = useState(null);
+const [editingEarning, setEditingEarning] = useState(null);
+
+
+// Add these handler functions
+const handleExpenseUpdated = (updatedExpense) => {
+  setBatch(prev => ({
+    ...prev,
+    expenses: prev.expenses.map(exp => 
+      exp.id === updatedExpense.id ? updatedExpense : exp
+    )
+  }));
+  setEditingExpense(null);
+  fetchBatch(); // Refresh data to get updated totals
+};
+
+const handleEarningUpdated = (updatedEarning) => {
+  setBatch(prev => ({
+    ...prev,
+    earnings: prev.earnings.map(earn => 
+      earn.id === updatedEarning.id ? updatedEarning : earn
+    )
+  }));
+  setEditingEarning(null);
+  fetchBatch(); // Refresh data to get updated totals
+};
+
   useEffect(() => {
     if (session && id) {
       fetchBatch();
@@ -47,6 +75,53 @@ export default function BatchDetail() {
     }));
     fetchBatch(); // Refresh data to get updated totals
   };
+
+  // Add these handler functions near your other handlers
+const handleDeleteExpense = async (expenseId) => {
+  if (confirm("Are you sure you want to delete this expense?")) {
+    try {
+      const res = await fetch(`/api/expenses/${expenseId}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        setBatch(prev => ({
+          ...prev,
+          expenses: prev.expenses.filter(exp => exp.id !== expenseId)
+        }));
+        fetchBatch(); // Refresh data to get updated totals
+      } else {
+        alert("Failed to delete expense");
+      }
+    } catch (error) {
+      console.error("Error deleting expense:", error);
+      alert("An error occurred while deleting expense");
+    }
+  }
+};
+
+const handleDeleteEarning = async (earningId) => {
+  if (confirm("Are you sure you want to delete this earning?")) {
+    try {
+      const res = await fetch(`/api/earnings/${earningId}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        setBatch(prev => ({
+          ...prev,
+          earnings: prev.earnings.filter(earn => earn.id !== earningId)
+        }));
+        fetchBatch(); // Refresh data to get updated totals
+      } else {
+        alert("Failed to delete earning");
+      }
+    } catch (error) {
+      console.error("Error deleting earning:", error);
+      alert("An error occurred while deleting earning");
+    }
+  }
+};
 
   if (!session) {
     return (
@@ -193,121 +268,165 @@ export default function BatchDetail() {
             </div>
           )}
 
-          {activeTab === "expenses" && (
-            <div>
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-medium text-gray-800">Expenses</h2>
-                <ExpenseForm batchId={batch.id} onExpenseAdded={handleExpenseAdded} />
-              </div>
-              
-              {batch.expenses?.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Item
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Quantity
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Cost/Unit
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Total
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Category
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {batch.expenses.map((expense) => (
-                        <tr key={expense.id}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {expense.itemName}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {expense.quantity}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            ${expense.costPerUnit.toFixed(2)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-medium">
-                            ${expense.total.toFixed(2)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {expense.category}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <p className="text-gray-500 text-center py-8">No expenses recorded yet</p>
-              )}
-            </div>
-          )}
+{activeTab === "expenses" && (
+  <div>
+    <div className="flex justify-between items-center mb-6">
+      <h2 className="text-lg font-medium text-gray-800">Expenses</h2>
+      <ExpenseForm 
+        batchId={batch.id} 
+        onExpenseAdded={handleExpenseAdded}
+        onExpenseUpdated={handleExpenseUpdated}
+        expenseToEdit={editingExpense}
+      />
+    </div>
+    
+    {batch.expenses?.length > 0 ? (
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Item
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Quantity
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Cost/Unit
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Total
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Category
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {batch.expenses.map((expense) => (
+              <tr key={expense.id}>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  {expense.itemName}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {expense.quantity}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  ${expense.costPerUnit.toFixed(2)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-medium">
+                  ${expense.total.toFixed(2)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {expense.category}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <button
+                    onClick={() => setEditingExpense(expense)}
+                    className="text-blue-600 hover:text-blue-900 mr-3"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteExpense(expense.id)}
+                    className="text-red-600 hover:text-red-900"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    ) : (
+      <p className="text-gray-500 text-center py-8">No expenses recorded yet</p>
+    )}
+  </div>
+)}
 
-          {activeTab === "earnings" && (
-            <div>
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-medium text-gray-800">Earnings</h2>
-                <EarningForm batchId={batch.id} onEarningAdded={handleEarningAdded} />
-              </div>
-              
-              {batch.earnings?.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Item
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Quantity
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Amount/Unit
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Total
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Category
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {batch.earnings.map((earning) => (
-                        <tr key={earning.id}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {earning.itemName}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {earning.quantity}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            ${earning.amountPerUnit.toFixed(2)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-medium">
-                            ${earning.total.toFixed(2)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {earning.category}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <p className="text-gray-500 text-center py-8">No earnings recorded yet</p>
-              )}
-            </div>
-          )}
+{activeTab === "earnings" && (
+  <div>
+    <div className="flex justify-between items-center mb-6">
+      <h2 className="text-lg font-medium text-gray-800">Earnings</h2>
+      <EarningForm 
+        batchId={batch.id} 
+        onEarningAdded={handleEarningAdded}
+        onEarningUpdated={handleEarningUpdated}
+        earningToEdit={editingEarning}
+      />
+    </div>
+    
+    {batch.earnings?.length > 0 ? (
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Item
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Quantity
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Amount/Unit
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Total
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Category
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {batch.earnings.map((earning) => (
+              <tr key={earning.id}>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  {earning.itemName}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {earning.quantity}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  ${earning.amountPerUnit.toFixed(2)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-medium">
+                  ${earning.total.toFixed(2)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {earning.category}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <button
+                    onClick={() => setEditingEarning(earning)}
+                    className="text-blue-600 hover:text-blue-900 mr-3"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteEarning(earning.id)}
+                    className="text-red-600 hover:text-red-900"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    ) : (
+      <p className="text-gray-500 text-center py-8">No earnings recorded yet</p>
+    )}
+  </div>
+)}
 
           {activeTab === "analytics" && (
             <div>
