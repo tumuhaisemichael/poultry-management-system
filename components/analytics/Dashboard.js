@@ -1,6 +1,7 @@
 // components/analytics/Dashboard.js
 import { useState, useEffect } from "react";
 import { Bar, Pie, Line } from "react-chartjs-2";
+import { formatCurrency } from "../../lib/currency";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -95,6 +96,25 @@ export default function Dashboard() {
     ],
   };
 
+  const chartOptions = {
+    plugins: {
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            let label = context.dataset.label || '';
+            if (label) {
+              label += ': ';
+            }
+            if (context.parsed.y !== null) {
+              label += formatCurrency(context.parsed.y);
+            }
+            return label;
+          }
+        }
+      }
+    }
+  };
+
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Analytics Dashboard</h1>
@@ -115,18 +135,18 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <div className="bg-white p-4 rounded shadow">
           <h2 className="text-xl font-semibold mb-4">Expenses vs Earnings</h2>
-          <Bar data={expenseData} />
+          <Bar data={expenseData} options={chartOptions} />
         </div>
         <div className="bg-white p-4 rounded shadow">
           <h2 className="text-xl font-semibold mb-4">Profit/Loss by Batch</h2>
-          <Bar data={profitData} />
+          <Bar data={profitData} options={chartOptions} />
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white p-4 rounded shadow">
           <h2 className="text-xl font-semibold mb-4">Expenses by Category</h2>
-          <Pie data={categoryData} />
+          <Pie data={categoryData} options={chartOptions} />
         </div>
         <div className="bg-white p-4 rounded shadow">
           <h2 className="text-xl font-semibold mb-4">Profit Trend</h2>
@@ -138,7 +158,7 @@ export default function Dashboard() {
               borderColor: "rgba(75, 192, 192, 1)",
               tension: 0.1
             }]
-          }} />
+          }} options={chartOptions} />
         </div>
       </div>
     </div>
