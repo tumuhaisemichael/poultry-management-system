@@ -25,11 +25,11 @@ export default function BatchList() {
     }
   };
 
-  const filteredBatches = batches.filter((batch) => {
+  const filteredBatches = Array.isArray(batches) ? batches.filter((batch) => {
     const matchesSearch = batch.name.toLowerCase().includes(filter.toLowerCase());
     const matchesStatus = statusFilter === "all" || batch.status === statusFilter;
     return matchesSearch && matchesStatus;
-  });
+  }) : [];
 
   if (!session) {
     return (

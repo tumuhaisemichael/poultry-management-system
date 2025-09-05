@@ -8,9 +8,12 @@ export default function ExpenseForm({ batchId, onExpenseAdded, onExpenseUpdated,
     costPerUnit: 0,
     category: "FEED",
     isRecurring: false,
+    attachment: null,
+    attachmentName: null,
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [file, setFile] = useState(null);
 
   // Pre-fill form when editing an existing expense
   useEffect(() => {
@@ -21,19 +24,52 @@ export default function ExpenseForm({ batchId, onExpenseAdded, onExpenseUpdated,
         costPerUnit: expenseToEdit.costPerUnit,
         category: expenseToEdit.category,
         isRecurring: expenseToEdit.isRecurring,
+        attachment: expenseToEdit.attachment,
+        attachmentName: expenseToEdit.attachmentName,
       });
       setIsOpen(true);
     }
   }, [expenseToEdit]);
+
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
 
+    let attachmentUrl = formData.attachment;
+    let attachmentName = formData.attachmentName;
+
+    if (file) {
+      const fileData = new FormData();
+      fileData.append("file", file);
+
+      try {
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          body: fileData,
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          attachmentUrl = data.filePath;
+          attachmentName = data.fileName;
+        } else {
+          throw new Error("File upload failed");
+        }
+      } catch (error) {
+        setError("Error uploading file.");
+        setIsLoading(false);
+        return;
+      }
+    }
+
     try {
       const total = formData.quantity * formData.costPerUnit;
-      const expenseData = { ...formData, total, batchId };
+      const expenseData = { ...formData, total, batchId, attachment: attachmentUrl, attachmentName };
 
       let res;
       if (expenseToEdit) {
@@ -69,7 +105,10 @@ export default function ExpenseForm({ batchId, onExpenseAdded, onExpenseUpdated,
           costPerUnit: 0,
           category: "FEED",
           isRecurring: false,
+          attachment: null,
+          attachmentName: null,
         });
+        setFile(null);
         setIsOpen(false);
       } else {
         const data = await res.json();
@@ -90,7 +129,10 @@ export default function ExpenseForm({ batchId, onExpenseAdded, onExpenseUpdated,
       costPerUnit: 0,
       category: "FEED",
       isRecurring: false,
+      attachment: null,
+      attachmentName: null,
     });
+    setFile(null);
   };
 
   if (!isOpen && !expenseToEdit) {
@@ -203,6 +245,22 @@ export default function ExpenseForm({ batchId, onExpenseAdded, onExpenseUpdated,
             <label htmlFor="recurring" className="text-sm text-gray-700">
               Recurring Expense
             </label>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Attachment
+            </label>
+            <input
+              type="file"
+              onChange={handleFileChange}
+              className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
+            {formData.attachmentName && (
+              <p className="text-sm text-gray-500 mt-2">
+                Current file: {formData.attachmentName}
+              </p>
+            )}
           </div>
 
           <div className="flex justify-end gap-3 pt-4">
