@@ -13,7 +13,10 @@ export default async function handler(req, res) {
 
   if (req.method === "PUT") {
     try {
-      const { itemName, quantity, costPerUnit, total, category, isRecurring } = req.body;
+      const {
+        itemName, quantity, costPerUnit, total, category, isRecurring,
+        transactionDate, weekOfGiving, unit
+      } = req.body;
 
       // Verify user owns the expense
       const expense = await prisma.expense.findFirst({
@@ -38,6 +41,9 @@ export default async function handler(req, res) {
           total,
           category,
           isRecurring,
+          transactionDate: transactionDate ? new Date(transactionDate) : null,
+          weekOfGiving,
+          unit,
         },
       });
 

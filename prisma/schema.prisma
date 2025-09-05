@@ -54,46 +54,37 @@ enum BatchStatus {
 }
 
 model Expense {
-  id          String      @id @default(cuid())
-  itemName    String
-  quantity    Float
-  costPerUnit Float
-  total       Float
-  category    ExpenseCategory
-  isRecurring Boolean     @default(false)
-  receipt     String?     // URL to uploaded receipt
-  batchId     String
-  batch       Batch       @relation(fields: [batchId], references: [id], onDelete: Cascade)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id              String    @id @default(cuid())
+  itemName        String
+  quantity        Float
+  costPerUnit     Float
+  total           Float
+  category        String
+  isRecurring     Boolean   @default(false)
+  receipt         String? // URL to uploaded receipt
+  batchId         String
+  batch           Batch     @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  transactionDate DateTime?
+  weekOfGiving    Int?
+  unit            String?
 
   @@map("expenses")
 }
 
-enum ExpenseCategory {
-  FEED
-  VACCINES
-  EQUIPMENT
-  MISCELLANEOUS
-}
-
 model Earning {
-  id          String      @id @default(cuid())
-  itemName    String
-  quantity    Float
-  amountPerUnit Float
-  total       Float
-  category    EarningCategory
-  batchId     String
-  batch       Batch       @relation(fields: [batchId], references: [id], onDelete: Cascade)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id              String    @id @default(cuid())
+  itemName        String
+  quantity        Float
+  amountPerUnit   Float
+  total           Float
+  category        String
+  batchId         String
+  batch           Batch     @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  transactionDate DateTime?
 
   @@map("earnings")
-}
-
-enum EarningCategory {
-  CHICKEN_SALES
-  EGG_SALES
-  BY_PRODUCTS
 }

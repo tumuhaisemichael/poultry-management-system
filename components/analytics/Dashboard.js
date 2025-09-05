@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { Bar, Pie, Line } from "react-chartjs-2";
 import { formatCurrency } from "../../lib/currency";
+import { generateDashboardPDF } from "../../lib/pdfGenerator";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -117,7 +118,15 @@ export default function Dashboard() {
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Analytics Dashboard</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Analytics Dashboard</h1>
+        <button
+          onClick={() => generateDashboardPDF(batchData, timeRange)}
+          className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg"
+        >
+          Download PDF
+        </button>
+      </div>
       
       <div className="mb-6">
         <select 

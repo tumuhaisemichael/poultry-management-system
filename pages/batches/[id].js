@@ -6,6 +6,7 @@ import Link from "next/link";
 import ExpenseForm from "../../components/expenses/ExpenseForm";
 import EarningForm from "../../components/earnings/EarningForm";
 import { formatCurrency } from "../../lib/currency";
+import { generateExpensesPDF, generateEarningsPDF, generateAnalyticsPDF } from "../../lib/pdfGenerator";
 
 export default function BatchDetail() {
   const [batch, setBatch] = useState(null);
@@ -302,12 +303,20 @@ const handleDeleteEarning = async (earningId) => {
   <div>
     <div className="flex justify-between items-center mb-6">
       <h2 className="text-lg font-medium text-gray-800">Expenses</h2>
-      <ExpenseForm 
-        batchId={batch.id} 
-        onExpenseAdded={handleExpenseAdded}
-        onExpenseUpdated={handleExpenseUpdated}
-        expenseToEdit={editingExpense}
-      />
+      <div className="flex items-center gap-4">
+        <button
+            onClick={() => generateExpensesPDF(batch.expenses, batch.name)}
+            className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg"
+        >
+            Download PDF
+        </button>
+        <ExpenseForm
+          batchId={batch.id}
+          onExpenseAdded={handleExpenseAdded}
+          onExpenseUpdated={handleExpenseUpdated}
+          expenseToEdit={editingExpense}
+        />
+      </div>
     </div>
     
     {batch.expenses?.length > 0 ? (
@@ -382,12 +391,20 @@ const handleDeleteEarning = async (earningId) => {
   <div>
     <div className="flex justify-between items-center mb-6">
       <h2 className="text-lg font-medium text-gray-800">Earnings</h2>
-      <EarningForm 
-        batchId={batch.id} 
-        onEarningAdded={handleEarningAdded}
-        onEarningUpdated={handleEarningUpdated}
-        earningToEdit={editingEarning}
-      />
+      <div className="flex items-center gap-4">
+        <button
+            onClick={() => generateEarningsPDF(batch.earnings, batch.name)}
+            className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg"
+        >
+            Download PDF
+        </button>
+        <EarningForm
+          batchId={batch.id}
+          onEarningAdded={handleEarningAdded}
+          onEarningUpdated={handleEarningUpdated}
+          earningToEdit={editingEarning}
+        />
+      </div>
     </div>
     
     {batch.earnings?.length > 0 ? (
@@ -460,7 +477,15 @@ const handleDeleteEarning = async (earningId) => {
 
           {activeTab === "analytics" && (
             <div>
-              <h2 className="text-lg font-medium text-gray-800 mb-4">Analytics</h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-medium text-gray-800">Analytics</h2>
+                <button
+                  onClick={() => generateAnalyticsPDF(batch)}
+                  className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg"
+                >
+                  Download PDF
+                </button>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h3 className="font-medium text-gray-700 mb-2">Financial Summary</h3>
