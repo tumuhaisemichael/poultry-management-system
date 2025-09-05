@@ -154,6 +154,28 @@ const handleDeleteEarning = async (earningId) => {
   const totalEarnings = batch.earnings?.reduce((sum, earn) => sum + earn.total, 0) || 0;
   const profitLoss = totalEarnings - totalExpenses;
 
+  const handleStatusChange = async (newStatus) => {
+    try {
+      const res = await fetch(`/api/batches/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (res.ok) {
+        const updatedBatch = await res.json();
+        setBatch(updatedBatch);
+      } else {
+        alert("Failed to update status");
+      }
+    } catch (error) {
+      console.error("Error updating status:", error);
+      alert("An error occurred while updating status");
+    }
+  };
+
   return (
     <div className="container mx-auto p-6">
       <div className="mb-6">
@@ -173,14 +195,21 @@ const handleDeleteEarning = async (earningId) => {
                 {batch.endDate && ` • Ended: ${new Date(batch.endDate).toLocaleDateString()}`}
               </p>
             </div>
-            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-              batch.status === "IN_PROGRESS" ? "bg-blue-100 text-blue-800" :
-              batch.status === "SOLD" ? "bg-green-100 text-green-800" :
-              batch.status === "COMPLETED" ? "bg-gray-100 text-gray-800" :
-              "bg-red-100 text-red-800"
-            }`}>
-              {batch.status.replace("_", " ")}
-            </span>
+            <select
+              value={batch.status}
+              onChange={(e) => handleStatusChange(e.target.value)}
+              className={`px-3 py-1 rounded-full text-sm font-medium border-none outline-none ${
+                batch.status === "IN_PROGRESS" ? "bg-blue-100 text-blue-800" :
+                batch.status === "SOLD" ? "bg-green-100 text-green-800" :
+                batch.status === "COMPLETED" ? "bg-gray-100 text-gray-800" :
+                "bg-red-100 text-red-800"
+              }`}
+            >
+              <option value="IN_PROGRESS">In Progress</option>
+              <option value="SOLD">Sold</option>
+              <option value="COMPLETED">Completed</option>
+              <option value="CANCELLED">Cancelled</option>
+            </select>
           </div>
 
           {batch.notes && (
