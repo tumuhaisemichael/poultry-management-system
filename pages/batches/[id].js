@@ -5,6 +5,7 @@ import { ArrowLeftIcon, PlusIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import ExpenseForm from "../../components/expenses/ExpenseForm";
 import EarningForm from "../../components/earnings/EarningForm";
+import { formatCurrency } from "../../lib/currency";
 
 export default function BatchDetail() {
   const [batch, setBatch] = useState(null);
@@ -194,17 +195,17 @@ const handleDeleteEarning = async (earningId) => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-6 bg-gray-50">
           <div className="bg-white p-4 rounded-lg shadow-sm">
             <h3 className="text-sm font-medium text-gray-500">Total Expenses</h3>
-            <p className="text-2xl font-bold text-red-600">${totalExpenses.toFixed(2)}</p>
+            <p className="text-2xl font-bold text-red-600">{formatCurrency(totalExpenses)}</p>
           </div>
           <div className="bg-white p-4 rounded-lg shadow-sm">
             <h3 className="text-sm font-medium text-gray-500">Total Earnings</h3>
-            <p className="text-2xl font-bold text-green-600">${totalEarnings.toFixed(2)}</p>
+            <p className="text-2xl font-bold text-green-600">{formatCurrency(totalEarnings)}</p>
           </div>
           <div className={`bg-white p-4 rounded-lg shadow-sm ${
             profitLoss >= 0 ? 'text-green-600' : 'text-red-600'
           }`}>
             <h3 className="text-sm font-medium text-gray-500">Profit/Loss</h3>
-            <p className="text-2xl font-bold">${profitLoss.toFixed(2)}</p>
+            <p className="text-2xl font-bold">{formatCurrency(profitLoss)}</p>
           </div>
         </div>
       </div>
@@ -241,7 +242,7 @@ const handleDeleteEarning = async (earningId) => {
                       {batch.expenses.slice(0, 5).map((expense) => (
                         <div key={expense.id} className="flex justify-between items-center p-3 bg-gray-50 rounded">
                           <span>{expense.itemName}</span>
-                          <span className="text-red-600">${expense.total.toFixed(2)}</span>
+                          <span className="text-red-600">{formatCurrency(expense.total)}</span>
                         </div>
                       ))}
                     </div>
@@ -256,7 +257,7 @@ const handleDeleteEarning = async (earningId) => {
                       {batch.earnings.slice(0, 5).map((earning) => (
                         <div key={earning.id} className="flex justify-between items-center p-3 bg-gray-50 rounded">
                           <span>{earning.itemName}</span>
-                          <span className="text-green-600">${earning.total.toFixed(2)}</span>
+                          <span className="text-green-600">{formatCurrency(earning.total)}</span>
                         </div>
                       ))}
                     </div>
@@ -315,10 +316,10 @@ const handleDeleteEarning = async (earningId) => {
                   {expense.quantity}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  ${expense.costPerUnit.toFixed(2)}
+                  {formatCurrency(expense.costPerUnit)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-medium">
-                  ${expense.total.toFixed(2)}
+                  {formatCurrency(expense.total)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {expense.category}
@@ -395,10 +396,10 @@ const handleDeleteEarning = async (earningId) => {
                   {earning.quantity}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  ${earning.amountPerUnit.toFixed(2)}
+                  {formatCurrency(earning.amountPerUnit)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-medium">
-                  ${earning.total.toFixed(2)}
+                  {formatCurrency(earning.total)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {earning.category}
@@ -437,16 +438,16 @@ const handleDeleteEarning = async (earningId) => {
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span>Total Expenses:</span>
-                      <span className="text-red-600">${totalExpenses.toFixed(2)}</span>
+                      <span className="text-red-600">{formatCurrency(totalExpenses)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Total Earnings:</span>
-                      <span className="text-green-600">${totalEarnings.toFixed(2)}</span>
+                      <span className="text-green-600">{formatCurrency(totalEarnings)}</span>
                     </div>
                     <div className="flex justify-between border-t pt-2">
                       <span className="font-medium">Net Profit/Loss:</span>
                       <span className={profitLoss >= 0 ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
-                        ${profitLoss.toFixed(2)}
+                        {formatCurrency(profitLoss)}
                       </span>
                     </div>
                   </div>
