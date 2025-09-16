@@ -10,13 +10,20 @@ export default function BatchList() {
   const { data: session } = useSession();
 
   useEffect(() => {
-    fetchBatches();
-  }, []);
+    if (session) {
+      fetchBatches();
+    }
+  }, [session]);
 
   const fetchBatches = async () => {
     const res = await fetch("/api/batches");
     const data = await res.json();
-    setBatches(data);
+    if (res.ok) {
+      setBatches(data);
+    } else {
+      console.error("Failed to fetch batches:", data);
+      setBatches([]);
+    }
   };
 
   const filteredBatches = batches.filter((batch) => {
