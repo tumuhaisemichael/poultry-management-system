@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { formatCurrency } from '../../lib/currency';
 
 export default function DownloadButton({ batchData }) {
@@ -28,12 +28,13 @@ export default function DownloadButton({ batchData }) {
       const totalEarnings = earnings.reduce((sum, earn) => {
         const subtractionsTotal = earn.subtractions?.reduce((subSum, sub) => subSum + sub.amount, 0) || 0;
         return sum + (earn.total - subtractionsTotal);
-      },0);
+      }, 0);
       const profitLoss = totalEarnings - totalExpenses;
 
       doc.setFontSize(14);
       doc.text('Financial Summary', 14, yOffset);
-      doc.autoTable({
+      
+      autoTable(doc, {
         startY: yOffset + 5,
         head: [['Metric', 'Amount']],
         body: [
@@ -44,13 +45,15 @@ export default function DownloadButton({ batchData }) {
         theme: 'striped',
         headStyles: { fillColor: [22, 160, 133] },
       });
-      return doc.autoTable.previous.finalY + 10;
+      
+      // Access finalY from doc.lastAutoTable or doc.autoTable.previous
+      return (doc.lastAutoTable?.finalY || doc.autoTable?.previous?.finalY || yOffset + 50) + 10;
     };
 
     switch (type) {
       case 'earnings':
         addHeader('Earnings Report');
-        doc.autoTable({
+        autoTable(doc, {
           startY: 40,
           head: [['Item', 'Category', 'Total', 'Net Amount']],
           body: earnings.map(e => {
@@ -64,7 +67,7 @@ export default function DownloadButton({ batchData }) {
 
       case 'expenses':
         addHeader('Expenses Report');
-        doc.autoTable({
+        autoTable(doc, {
           startY: 40,
           head: [['Item', 'Category', 'Quantity', 'Cost/Unit', 'Total']],
           body: expenses.map(e => [e.itemName, e.category, e.quantity, formatCurrency(e.costPerUnit), formatCurrency(e.total)]),
@@ -84,7 +87,7 @@ export default function DownloadButton({ batchData }) {
 
         doc.setFontSize(14);
         doc.text('Earnings Details', 14, yOffset);
-        doc.autoTable({
+        autoTable(doc, {
           startY: yOffset + 5,
           head: [['Item', 'Category', 'Total', 'Net Amount']],
           body: earnings.map(e => {
@@ -93,11 +96,13 @@ export default function DownloadButton({ batchData }) {
             return [e.itemName, e.category, formatCurrency(e.total), formatCurrency(netAmount)];
           }),
         });
-        yOffset = doc.autoTable.previous.finalY + 10;
+        
+        // Get the finalY position after the earnings table
+        yOffset = (doc.lastAutoTable?.finalY || doc.autoTable?.previous?.finalY || yOffset + 50) + 10;
 
         doc.setFontSize(14);
         doc.text('Expenses Details', 14, yOffset);
-        doc.autoTable({
+        autoTable(doc, {
           startY: yOffset + 5,
           head: [['Item', 'Category', 'Quantity', 'Cost/Unit', 'Total']],
           body: expenses.map(e => [e.itemName, e.category, e.quantity, formatCurrency(e.costPerUnit), formatCurrency(e.total)]),
