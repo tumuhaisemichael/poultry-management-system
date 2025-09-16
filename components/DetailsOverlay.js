@@ -1,4 +1,5 @@
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import { formatCurrency } from "../lib/currency";
 
 export default function DetailsOverlay({ item, onClose, type }) {
   if (!item) return null;
@@ -10,8 +11,8 @@ export default function DetailsOverlay({ item, onClose, type }) {
   const fields = [
     { label: 'Item Name', value: item.itemName },
     { label: 'Quantity', value: item.quantity },
-    { label: isExpense ? 'Cost Per Unit' : 'Amount Per Unit', value: `$${(isExpense ? item.costPerUnit : item.amountPerUnit).toFixed(2)}` },
-    { label: 'Total', value: `$${item.total.toFixed(2)}`, isTotal: true },
+    { label: isExpense ? 'Cost Per Unit' : 'Amount Per Unit', value: formatCurrency(isExpense ? item.costPerUnit : item.amountPerUnit) },
+    { label: 'Total', value: formatCurrency(item.total), isTotal: true },
     { label: 'Category', value: item.category },
     { label: 'Date', value: new Date(item.createdAt).toLocaleDateString() },
   ];

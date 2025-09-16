@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { PlusIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { formatCurrency } from "../../lib/currency";
 
 export default function BatchList() {
   const [batches, setBatches] = useState([]);
@@ -120,10 +121,10 @@ export default function BatchList() {
 
                 <div className="flex justify-between items-center mb-4">
                   <div className="text-sm text-gray-500">
-                    Expenses: <span className="font-medium text-red-600">${batch.expenses?.reduce((sum, exp) => sum + exp.total, 0) || 0}</span>
+                    Expenses: <span className="font-medium text-red-600">{formatCurrency(batch.expenses?.reduce((sum, exp) => sum + exp.total, 0) || 0)}</span>
                   </div>
                   <div className="text-sm text-gray-500">
-                    Earnings: <span className="font-medium text-green-600">${batch.earnings?.reduce((sum, earn) => sum + earn.total, 0) || 0}</span>
+                    Earnings: <span className="font-medium text-green-600">{formatCurrency(batch.earnings?.reduce((sum, earn) => sum + earn.total, 0) || 0)}</span>
                   </div>
                 </div>
 
