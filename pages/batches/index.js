@@ -43,7 +43,7 @@ export default function BatchList() {
   }
 
   return (
-    <div className="container mx-auto p-6">
+    <>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h1 className="text-2xl font-bold text-gray-800">Poultry Batches</h1>
         <Link href="/batches/new">
@@ -138,6 +138,6 @@ export default function BatchList() {
           ))
         )}
       </div>
-    </div>
+    </>
   );
 }

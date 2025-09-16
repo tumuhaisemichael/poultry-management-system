@@ -193,7 +193,7 @@ const handleDeleteEarning = async (earningId) => {
   };
 
   return (
-    <div className="container mx-auto p-6">
+    <>
       {isCalculatorOpen && <Calculator batch={batch} onClose={() => setIsCalculatorOpen(false)} />}
       <DetailsOverlay item={selectedItem} onClose={closeOverlay} type={overlayType} />
       <div className="mb-6">
@@ -531,6 +531,6 @@ const handleDeleteEarning = async (earningId) => {
           )}
         </div>
       </div>
-    </div>
+    </>
   );
 }
