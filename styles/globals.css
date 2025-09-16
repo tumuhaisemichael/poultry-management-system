@@ -2,6 +2,34 @@
 @tailwind components;
 @tailwind utilities; */
 
+@media screen and (max-width: 768px) {
+  .responsive-table thead {
+    display: none;
+  }
+  .responsive-table tr {
+    display: block;
+    margin-bottom: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 0.5rem;
+    padding: 1rem;
+  }
+  .responsive-table td {
+    display: block;
+    text-align: right;
+    border-bottom: 1px solid #eee;
+    padding: 0.5rem 0;
+  }
+  .responsive-table td:last-child {
+    border-bottom: 0;
+  }
+  .responsive-table td::before {
+    content: attr(data-label);
+    float: left;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+}
+
 @import "tailwindcss";
 /* Ensure modal is properly centered */
 .modal-overlay {

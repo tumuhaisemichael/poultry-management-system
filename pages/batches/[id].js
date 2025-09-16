@@ -213,7 +213,7 @@ const handleDeleteEarning = async (earningId) => {
                 {batch.endDate && ` • Ended: ${new Date(batch.endDate).toLocaleDateString()}`}
               </p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 flex-wrap">
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                 batch.status === "IN_PROGRESS" ? "bg-blue-100 text-blue-800" :
                 batch.status === "SOLD" ? "bg-green-100 text-green-800" :
@@ -262,7 +262,7 @@ const handleDeleteEarning = async (earningId) => {
       {/* Tab Navigation */}
       <div className="bg-white rounded-lg shadow-md mb-6">
         <div className="border-b border-gray-200">
-          <nav className="flex -mb-px">
+          <nav className="flex -mb-px overflow-x-auto">
             {["overview", "expenses", "earnings", "analytics"].map((tab) => (
               <button
                 key={tab}
@@ -336,7 +336,7 @@ const handleDeleteEarning = async (earningId) => {
     
     {batch.expenses?.length > 0 ? (
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
+        <table className="min-w-full divide-y divide-gray-200 responsive-table">
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -362,22 +362,22 @@ const handleDeleteEarning = async (earningId) => {
           <tbody className="bg-white divide-y divide-gray-200">
             {batch.expenses.map((expense) => (
               <tr key={expense.id} onClick={() => handleExpenseRowClick(expense)} className="cursor-pointer hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                <td data-label="Item" className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                   {expense.itemName}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td data-label="Quantity" className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {expense.quantity}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td data-label="Cost/Unit" className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {formatCurrency(expense.costPerUnit)}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-medium">
+                <td data-label="Total" className="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-medium">
                   {formatCurrency(expense.total)}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td data-label="Category" className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {expense.category}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <td data-label="Actions" className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <button
                     onClick={() => setEditingExpense(expense)}
                     className="text-blue-600 hover:text-blue-900 mr-3"
@@ -416,7 +416,7 @@ const handleDeleteEarning = async (earningId) => {
     
     {batch.earnings?.length > 0 ? (
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
+        <table className="min-w-full divide-y divide-gray-200 responsive-table">
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -442,19 +442,19 @@ const handleDeleteEarning = async (earningId) => {
               const netAmount = earning.total - subtractionsTotal;
               return (
                 <tr key={earning.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" onClick={() => handleEarningRowClick(earning)}>
+                  <td data-label="Item" className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" onClick={() => handleEarningRowClick(earning)}>
                     {earning.itemName}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td data-label="Total" className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {formatCurrency(earning.total)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600">
+                  <td data-label="Subtractions" className="px-6 py-4 whitespace-nowrap text-sm text-red-600">
                     {formatCurrency(subtractionsTotal)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-medium">
+                  <td data-label="Net Amount" className="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-medium">
                     {formatCurrency(netAmount)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <td data-label="Actions" className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => setEditingEarning(earning)}
