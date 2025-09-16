@@ -12,9 +12,8 @@ export default function EarningForm({ batchId, onEarningAdded, onEarningUpdated,
     quantity: 1,
     amountPerUnit: 0,
     category: "CHICKEN_SALES",
-    attachment: null,
-    attachmentName: null,
     transactionDate: new Date().toISOString().split("T")[0],
+
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -64,11 +63,9 @@ export default function EarningForm({ batchId, onEarningAdded, onEarningUpdated,
         itemName: earningToEdit.itemName,
         quantity: earningToEdit.quantity,
         amountPerUnit: earningToEdit.amountPerUnit,
-        category: earningToEdit.category,
-        attachment: earningToEdit.attachment,
-        attachmentName: earningToEdit.attachmentName,
         category: isPreset ? earningToEdit.category : "OTHER",
         transactionDate: earningToEdit.transactionDate ? new Date(earningToEdit.transactionDate).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+
       });
       if (!isPreset) {
         setCustomCategory(earningToEdit.category);
@@ -93,17 +90,18 @@ export default function EarningForm({ batchId, onEarningAdded, onEarningUpdated,
       setError("Category is required.");
       setIsLoading(false);
       return;
+
     }
 
     try {
       const total = formData.quantity * formData.amountPerUnit;
-      const earningData = { ...formData, total, batchId, attachment: attachmentUrl, attachmentName };
       const earningData = {
         ...formData,
         total,
         batchId,
         category: finalCategory
       };
+
 
       let res;
       if (earningToEdit) {
@@ -127,16 +125,8 @@ export default function EarningForm({ batchId, onEarningAdded, onEarningUpdated,
         } else {
           onEarningAdded(earning);
         }
-        setFormData({
-          itemName: "",
-          quantity: 1,
-          amountPerUnit: 0,
-          category: "CHICKEN_SALES",
-          attachment: null,
-          attachmentName: null,
-        });
-        setFile(null);
         resetForm();
+
         setIsOpen(false);
       } else {
         const data = await res.json();
@@ -151,16 +141,8 @@ export default function EarningForm({ batchId, onEarningAdded, onEarningUpdated,
 
   const handleClose = () => {
     setIsOpen(false);
-    setFormData({
-      itemName: "",
-      quantity: 1,
-      amountPerUnit: 0,
-      category: "CHICKEN_SALES",
-      attachment: null,
-      attachmentName: null,
-    });
-    setFile(null);
     resetForm();
+
   };
 
   if (!isOpen && !earningToEdit) {

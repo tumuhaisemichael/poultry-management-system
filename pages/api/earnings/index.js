@@ -16,6 +16,7 @@ export default async function handler(req, res) {
         transactionDate
       } = req.body;
 
+
       // Verify user owns the batch
       const batch = await prisma.batch.findFirst({
         where: {
@@ -37,6 +38,7 @@ export default async function handler(req, res) {
           category,
           batchId,
           transactionDate: transactionDate ? new Date(transactionDate) : null,
+
         },
       });
 

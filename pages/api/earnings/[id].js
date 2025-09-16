@@ -18,6 +18,7 @@ export default async function handler(req, res) {
         transactionDate
       } = req.body;
 
+
       // Verify user owns the earning
       const earning = await prisma.earning.findFirst({
         where: {
@@ -41,6 +42,7 @@ export default async function handler(req, res) {
           total,
           category,
           transactionDate: transactionDate ? new Date(transactionDate) : null,
+
         },
       });
 

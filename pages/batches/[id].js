@@ -8,6 +8,7 @@ import EarningForm from "../../components/earnings/EarningForm";
 import { formatCurrency } from "../../lib/currency";
 import { generateExpensesPDF, generateEarningsPDF, generateAnalyticsPDF } from "../../lib/pdfGenerator";
 
+
 export default function BatchDetail() {
   const [batch, setBatch] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
@@ -176,6 +177,7 @@ const handleDeleteEarning = async (earningId) => {
       console.error("Error updating status:", error);
       alert("An error occurred while updating status");
     }
+
   };
 
   return (
