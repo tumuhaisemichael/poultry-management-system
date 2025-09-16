@@ -18,6 +18,7 @@ export default async function handler(req, res) {
         transactionDate, weekOfGiving, unit
       } = req.body;
 
+
       // Verify user owns the expense
       const expense = await prisma.expense.findFirst({
         where: {
@@ -44,6 +45,7 @@ export default async function handler(req, res) {
           transactionDate: transactionDate ? new Date(transactionDate) : null,
           weekOfGiving,
           unit,
+
         },
       });
 

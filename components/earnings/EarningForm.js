@@ -13,9 +13,11 @@ export default function EarningForm({ batchId, onEarningAdded, onEarningUpdated,
     amountPerUnit: 0,
     category: "CHICKEN_SALES",
     transactionDate: new Date().toISOString().split("T")[0],
+
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [file, setFile] = useState(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -64,6 +66,7 @@ export default function EarningForm({ batchId, onEarningAdded, onEarningUpdated,
         amountPerUnit: earningToEdit.amountPerUnit,
         category: isPreset ? earningToEdit.category : "OTHER",
         transactionDate: earningToEdit.transactionDate ? new Date(earningToEdit.transactionDate).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+
       });
       if (!isPreset) {
         setCustomCategory(earningToEdit.category);
@@ -73,6 +76,10 @@ export default function EarningForm({ batchId, onEarningAdded, onEarningUpdated,
       resetForm();
     }
   }, [earningToEdit]);
+
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -84,6 +91,7 @@ export default function EarningForm({ batchId, onEarningAdded, onEarningUpdated,
       setError("Category is required.");
       setIsLoading(false);
       return;
+
     }
 
     try {
@@ -94,6 +102,7 @@ export default function EarningForm({ batchId, onEarningAdded, onEarningUpdated,
         batchId,
         category: finalCategory
       };
+
 
       let res;
       if (earningToEdit) {
@@ -118,6 +127,7 @@ export default function EarningForm({ batchId, onEarningAdded, onEarningUpdated,
           onEarningAdded(earning);
         }
         resetForm();
+
         setIsOpen(false);
       } else {
         const data = await res.json();
@@ -133,6 +143,7 @@ export default function EarningForm({ batchId, onEarningAdded, onEarningUpdated,
   const handleClose = () => {
     setIsOpen(false);
     resetForm();
+
   };
 
   if (!isOpen && !earningToEdit) {
@@ -252,6 +263,22 @@ export default function EarningForm({ batchId, onEarningAdded, onEarningUpdated,
               value={formData.transactionDate}
               onChange={(e) => setFormData({ ...formData, transactionDate: e.target.value })}
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Attachment
+            </label>
+            <input
+              type="file"
+              onChange={handleFileChange}
+              className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+            />
+            {formData.attachmentName && (
+              <p className="text-sm text-gray-500 mt-2">
+                Current file: {formData.attachmentName}
+              </p>
+            )}
           </div>
 
           <div className="flex justify-end gap-3 pt-4">

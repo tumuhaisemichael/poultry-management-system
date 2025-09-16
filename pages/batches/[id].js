@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { ArrowLeftIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import ExpenseForm from "../../components/expenses/ExpenseForm";
 import EarningForm from "../../components/earnings/EarningForm";
 import { formatCurrency } from "../../lib/currency";
 import { generateExpensesPDF, generateEarningsPDF, generateAnalyticsPDF } from "../../lib/pdfGenerator";
+
 
 export default function BatchDetail() {
   const [batch, setBatch] = useState(null);
@@ -16,9 +17,10 @@ export default function BatchDetail() {
   const router = useRouter();
   const { id } = router.query;
 
-  // Add these state variables at the top of your component
-const [editingExpense, setEditingExpense] = useState(null);
-const [editingEarning, setEditingEarning] = useState(null);
+  const [editingExpense, setEditingExpense] = useState(null);
+  const [editingEarning, setEditingEarning] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [overlayType, setOverlayType] = useState('');
 
 
 // Add these handler functions
@@ -175,10 +177,12 @@ const handleDeleteEarning = async (earningId) => {
       console.error("Error updating status:", error);
       alert("An error occurred while updating status");
     }
+
   };
 
   return (
     <div className="container mx-auto p-6">
+      <DetailsOverlay item={selectedItem} onClose={closeOverlay} type={overlayType} />
       <div className="mb-6">
         <Link href="/batches" className="inline-flex items-center text-blue-500 hover:text-blue-700">
           <ArrowLeftIcon className="h-5 w-5 mr-2" />
@@ -346,7 +350,7 @@ const handleDeleteEarning = async (earningId) => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {batch.expenses.map((expense) => (
-              <tr key={expense.id}>
+              <tr key={expense.id} onClick={() => handleExpenseRowClick(expense)} className="cursor-pointer hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                   {expense.itemName}
                 </td>
@@ -434,7 +438,7 @@ const handleDeleteEarning = async (earningId) => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {batch.earnings.map((earning) => (
-              <tr key={earning.id}>
+              <tr key={earning.id} onClick={() => handleEarningRowClick(earning)} className="cursor-pointer hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                   {earning.itemName}
                 </td>

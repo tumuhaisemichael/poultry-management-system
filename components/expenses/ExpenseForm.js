@@ -66,6 +66,7 @@ export default function ExpenseForm({ batchId, onExpenseAdded, onExpenseUpdated,
     setReceiptFileName("");
   };
 
+
   useEffect(() => {
     if (expenseToEdit) {
       const isPreset = PRESET_CATEGORIES.includes(expenseToEdit.category);
@@ -80,6 +81,7 @@ export default function ExpenseForm({ batchId, onExpenseAdded, onExpenseUpdated,
         weekOfGiving: expenseToEdit.weekOfGiving || "",
         unit: expenseToEdit.unit || "",
         receipt: expenseToEdit.receipt || "",
+
       });
       if (expenseToEdit.receipt) {
         setReceiptFileName(expenseToEdit.receipt.split('/').pop());
@@ -116,6 +118,7 @@ export default function ExpenseForm({ batchId, onExpenseAdded, onExpenseUpdated,
     } finally {
       setUploading(false);
     }
+
   };
 
   const handleSubmit = async (e) => {
@@ -128,6 +131,7 @@ export default function ExpenseForm({ batchId, onExpenseAdded, onExpenseUpdated,
       setError("Category is required.");
       setIsLoading(false);
       return;
+
     }
 
     try {
@@ -139,6 +143,7 @@ export default function ExpenseForm({ batchId, onExpenseAdded, onExpenseUpdated,
         category: finalCategory,
         weekOfGiving: formData.weekOfGiving ? parseInt(formData.weekOfGiving, 10) : null,
       };
+
 
       let res;
       if (expenseToEdit) {
@@ -163,6 +168,7 @@ export default function ExpenseForm({ batchId, onExpenseAdded, onExpenseUpdated,
           onExpenseAdded(expense);
         }
         resetForm();
+
         setIsOpen(false);
       } else {
         const data = await res.json();
@@ -178,6 +184,7 @@ export default function ExpenseForm({ batchId, onExpenseAdded, onExpenseUpdated,
   const handleClose = () => {
     setIsOpen(false);
     resetForm();
+
   };
 
   const getLabel = (field) => {
@@ -366,6 +373,22 @@ export default function ExpenseForm({ batchId, onExpenseAdded, onExpenseUpdated,
               onChange={(e) => setFormData({ ...formData, isRecurring: e.target.checked })}
             />
             <label htmlFor="recurring" className="text-sm text-gray-700">Recurring Expense</label>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Attachment
+            </label>
+            <input
+              type="file"
+              onChange={handleFileChange}
+              className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
+            {formData.attachmentName && (
+              <p className="text-sm text-gray-500 mt-2">
+                Current file: {formData.attachmentName}
+              </p>
+            )}
           </div>
 
           <div className="flex justify-end gap-3 pt-4">
