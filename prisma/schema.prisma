@@ -59,7 +59,7 @@ model Expense {
   quantity        Float
   costPerUnit     Float
   total           Float
-  category        ExpenseCategory
+  category        String
   isRecurring     Boolean   @default(false)
   attachment      String?
   attachmentName  String?
@@ -72,13 +72,6 @@ model Expense {
   unit            String?
 
   @@map("expenses")
-}
-
-enum ExpenseCategory {
-  FEED
-  VACCINES
-  EQUIPMENT
-  MISCELLANEOUS
 }
 
 model Earning {

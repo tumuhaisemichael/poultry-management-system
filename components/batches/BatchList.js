@@ -91,10 +91,22 @@ export default function BatchList() {
               Start Date: {new Date(batch.startDate).toLocaleDateString()}
             </p>
             {batch.endDate && (
-              <p className="text-gray-600 mb-4">
+              <p className="text-gray-600 mb-2">
                 End Date: {new Date(batch.endDate).toLocaleDateString()}
               </p>
             )}
+            <p className="text-gray-600 mb-2">
+              Total Expenses: ${" "}
+              {batch.expenses
+                .reduce((acc, expense) => acc + expense.total, 0)
+                .toFixed(2)}
+            </p>
+            <p className="text-gray-600 mb-4">
+              Total Earnings: ${" "}
+              {batch.earnings
+                .reduce((acc, earning) => acc + earning.total, 0)
+                .toFixed(2)}
+            </p>
             <Link href={`/batches/${batch.id}`}>
               <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 w-full">
                 View Details

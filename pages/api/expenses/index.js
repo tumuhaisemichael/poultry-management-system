@@ -31,7 +31,7 @@ export default async function handler(req, res) {
           quantity,
           costPerUnit,
           total,
-          category,
+          category: category || "MISCELLANEOUS",
           isRecurring,
           batchId,
           attachment,

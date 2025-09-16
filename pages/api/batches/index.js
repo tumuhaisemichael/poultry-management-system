@@ -32,6 +32,10 @@ export default async function handler(req, res) {
           where: {
             userId: session.user.id,
           },
+          include: {
+            expenses: true,
+            earnings: true,
+          },
           orderBy: {
             createdAt: "desc",
           },
