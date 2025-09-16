@@ -8,14 +8,23 @@ export default function DetailsOverlay({ item, onClose, type }) {
   const colorClass = isExpense ? 'text-red-600' : 'text-green-600';
   const bgColorClass = isExpense ? 'bg-red-50' : 'bg-green-50';
 
+  const subtractionsTotal = !isExpense ? item.subtractions?.reduce((sum, sub) => sum + sub.amount, 0) || 0 : 0;
+  const netAmount = item.total - subtractionsTotal;
+
   const fields = [
     { label: 'Item Name', value: item.itemName },
     { label: 'Quantity', value: item.quantity },
     { label: isExpense ? 'Cost Per Unit' : 'Amount Per Unit', value: formatCurrency(isExpense ? item.costPerUnit : item.amountPerUnit) },
-    { label: 'Total', value: formatCurrency(item.total), isTotal: true },
-    { label: 'Category', value: item.category },
-    { label: 'Date', value: new Date(item.createdAt).toLocaleDateString() },
+    { label: 'Total', value: formatCurrency(item.total) },
   ];
+
+  if (!isExpense) {
+    fields.push({ label: 'Subtractions', value: `-${formatCurrency(subtractionsTotal)}` });
+    fields.push({ label: 'Net Amount', value: formatCurrency(netAmount), isTotal: true });
+  }
+
+  fields.push({ label: 'Category', value: item.category });
+  fields.push({ label: 'Date', value: new Date(item.createdAt).toLocaleDateString() });
 
   if (isExpense) {
     fields.push({ label: 'Recurring', value: item.isRecurring ? 'Yes' : 'No' });
@@ -45,6 +54,23 @@ export default function DetailsOverlay({ item, onClose, type }) {
               <span className={`text-right ${isTotal ? colorClass : 'text-gray-900'}`}>{value}</span>
             </div>
           ))}
+
+          {!isExpense && item.subtractions?.length > 0 && (
+            <div className="pt-4">
+              <h3 className="text-gray-600 mb-2 font-semibold">Subtractions</h3>
+              <div className="space-y-2">
+                {item.subtractions.map(sub => (
+                  <div key={sub.id} className="flex justify-between items-start p-3 bg-gray-50 rounded">
+                    <div>
+                      <p className="font-medium">{formatCurrency(sub.amount)}</p>
+                      <p className="text-sm text-gray-500">{sub.reason}</p>
+                    </div>
+                    <p className="text-sm text-gray-400">{new Date(sub.createdAt).toLocaleDateString()}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {item.attachment && (
             <div className="pt-4">

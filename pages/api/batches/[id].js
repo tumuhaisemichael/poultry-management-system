@@ -26,7 +26,11 @@ export default async function handler(req, res) {
           },
           include: {
             expenses: true,
-            earnings: true,
+            earnings: {
+              include: {
+                subtractions: true,
+              },
+            },
             user: {
               select: {
                 name: true,
@@ -43,7 +47,11 @@ export default async function handler(req, res) {
           },
           include: {
             expenses: true,
-            earnings: true,
+            earnings: {
+              include: {
+                subtractions: true,
+              },
+            },
             user: {
               select: {
                 name: true,

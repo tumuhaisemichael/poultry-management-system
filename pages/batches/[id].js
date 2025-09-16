@@ -5,6 +5,7 @@ import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import ExpenseForm from "../../components/expenses/ExpenseForm";
 import EarningForm from "../../components/earnings/EarningForm";
+import SubtractionForm from "../../components/earnings/SubtractionForm";
 import DetailsOverlay from "../../components/DetailsOverlay";
 import { formatCurrency } from "../../lib/currency";
 
@@ -69,6 +70,10 @@ const handleEarningUpdated = (updatedEarning) => {
       expenses: [...prev.expenses, newExpense]
     }));
     fetchBatch(); // Refresh data to get updated totals
+  };
+
+  const handleSubtractionAdded = (newSubtraction) => {
+    fetchBatch(); // Just refetch the whole batch data for simplicity
   };
 
   const handleEarningAdded = (newEarning) => {
@@ -153,8 +158,16 @@ const handleDeleteEarning = async (earningId) => {
   }
 
   const totalExpenses = batch.expenses?.reduce((sum, exp) => sum + exp.total, 0) || 0;
+
   const totalEarnings = batch.earnings?.reduce((sum, earn) => sum + earn.total, 0) || 0;
-  const profitLoss = totalEarnings - totalExpenses;
+
+  const totalSubtractions = batch.earnings?.reduce((sum, earn) => {
+    const subtractionsTotal = earn.subtractions?.reduce((subSum, sub) => subSum + sub.amount, 0) || 0;
+    return sum + subtractionsTotal;
+  }, 0) || 0;
+
+  const netEarnings = totalEarnings - totalSubtractions;
+  const profitLoss = netEarnings - totalExpenses;
 
   const handleExpenseRowClick = (expense) => {
     setSelectedItem(expense);
@@ -216,8 +229,8 @@ const handleDeleteEarning = async (earningId) => {
             <p className="text-2xl font-bold text-red-600">{formatCurrency(totalExpenses)}</p>
           </div>
           <div className="bg-white p-4 rounded-lg shadow-sm">
-            <h3 className="text-sm font-medium text-gray-500">Total Earnings</h3>
-            <p className="text-2xl font-bold text-green-600">{formatCurrency(totalEarnings)}</p>
+            <h3 className="text-sm font-medium text-gray-500">Net Earnings</h3>
+            <p className="text-2xl font-bold text-green-600">{formatCurrency(netEarnings)}</p>
           </div>
           <div className={`bg-white p-4 rounded-lg shadow-sm ${
             profitLoss >= 0 ? 'text-green-600' : 'text-red-600'
@@ -272,12 +285,16 @@ const handleDeleteEarning = async (earningId) => {
                   <h3 className="font-medium text-gray-700 mb-3">Recent Earnings</h3>
                   {batch.earnings?.length > 0 ? (
                     <div className="space-y-2">
-                      {batch.earnings.slice(0, 5).map((earning) => (
-                        <div key={earning.id} className="flex justify-between items-center p-3 bg-gray-50 rounded">
-                          <span>{earning.itemName}</span>
-                          <span className="text-green-600">{formatCurrency(earning.total)}</span>
-                        </div>
-                      ))}
+                      {batch.earnings.slice(0, 5).map((earning) => {
+                        const subtractionsTotal = earning.subtractions?.reduce((subSum, sub) => subSum + sub.amount, 0) || 0;
+                        const netAmount = earning.total - subtractionsTotal;
+                        return (
+                          <div key={earning.id} className="flex justify-between items-center p-3 bg-gray-50 rounded">
+                            <span>{earning.itemName}</span>
+                            <span className="text-green-600">{formatCurrency(netAmount)}</span>
+                          </div>
+                        );
+                      })}
                     </div>
                   ) : (
                     <p className="text-gray-500">No earnings recorded</p>
@@ -371,8 +388,8 @@ const handleDeleteEarning = async (earningId) => {
   <div>
     <div className="flex justify-between items-center mb-6">
       <h2 className="text-lg font-medium text-gray-800">Earnings</h2>
-      <EarningForm 
-        batchId={batch.id} 
+      <EarningForm
+        batchId={batch.id}
         onEarningAdded={handleEarningAdded}
         onEarningUpdated={handleEarningUpdated}
         earningToEdit={editingEarning}
@@ -388,16 +405,13 @@ const handleDeleteEarning = async (earningId) => {
                 Item
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Quantity
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Amount/Unit
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Total
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Category
+                Subtractions
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Net Amount
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
@@ -405,39 +419,46 @@ const handleDeleteEarning = async (earningId) => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {batch.earnings.map((earning) => (
-              <tr key={earning.id} onClick={() => handleEarningRowClick(earning)} className="cursor-pointer hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {earning.itemName}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {earning.quantity}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {formatCurrency(earning.amountPerUnit)}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-medium">
-                  {formatCurrency(earning.total)}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {earning.category}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button
-                    onClick={() => setEditingEarning(earning)}
-                    className="text-blue-600 hover:text-blue-900 mr-3"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDeleteEarning(earning.id)}
-                    className="text-red-600 hover:text-red-900"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
+            {batch.earnings.map((earning) => {
+              const subtractionsTotal = earning.subtractions?.reduce((subSum, sub) => subSum + sub.amount, 0) || 0;
+              const netAmount = earning.total - subtractionsTotal;
+              return (
+                <tr key={earning.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" onClick={() => handleEarningRowClick(earning)}>
+                    {earning.itemName}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {formatCurrency(earning.total)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600">
+                    {formatCurrency(subtractionsTotal)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-medium">
+                    {formatCurrency(netAmount)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setEditingEarning(earning)}
+                        className="text-blue-600 hover:text-blue-900"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteEarning(earning.id)}
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        Delete
+                      </button>
+                      <SubtractionForm
+                        earningId={earning.id}
+                        onSubtractionAdded={handleSubtractionAdded}
+                      />
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -459,8 +480,8 @@ const handleDeleteEarning = async (earningId) => {
                       <span className="text-red-600">{formatCurrency(totalExpenses)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Total Earnings:</span>
-                      <span className="text-green-600">{formatCurrency(totalEarnings)}</span>
+                      <span>Net Earnings:</span>
+                      <span className="text-green-600">{formatCurrency(netEarnings)}</span>
                     </div>
                     <div className="flex justify-between border-t pt-2">
                       <span className="font-medium">Net Profit/Loss:</span>

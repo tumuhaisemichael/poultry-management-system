@@ -88,8 +88,20 @@ model Earning {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   transactionDate DateTime?
+  subtractions    EarningSubtraction[]
 
   @@map("earnings")
+}
+
+model EarningSubtraction {
+  id        String   @id @default(cuid())
+  amount    Float
+  reason    String
+  earningId String
+  earning   Earning  @relation(fields: [earningId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@map("earning_subtractions")
 }
 
 enum EarningCategory {
