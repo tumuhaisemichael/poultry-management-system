@@ -8,10 +8,12 @@ import EarningForm from "../../components/earnings/EarningForm";
 import SubtractionForm from "../../components/earnings/SubtractionForm";
 import DetailsOverlay from "../../components/DetailsOverlay";
 import DownloadButton from "../../components/batches/DownloadButton";
+import Calculator from "../../components/calculator/Calculator";
 import { formatCurrency } from "../../lib/currency";
 
 export default function BatchDetail() {
   const [batch, setBatch] = useState(null);
+  const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [isLoading, setIsLoading] = useState(true);
   const { data: session } = useSession();
@@ -192,6 +194,7 @@ const handleDeleteEarning = async (earningId) => {
 
   return (
     <div className="container mx-auto p-6">
+      {isCalculatorOpen && <Calculator batch={batch} onClose={() => setIsCalculatorOpen(false)} />}
       <DetailsOverlay item={selectedItem} onClose={closeOverlay} type={overlayType} />
       <div className="mb-6">
         <Link href="/batches" className="inline-flex items-center text-blue-500 hover:text-blue-700">
@@ -220,6 +223,12 @@ const handleDeleteEarning = async (earningId) => {
                 {batch.status.replace("_", " ")}
               </span>
               <DownloadButton batchData={batch} />
+              <button
+                onClick={() => setIsCalculatorOpen(true)}
+                className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+              >
+                Calculator
+              </button>
             </div>
           </div>
 
