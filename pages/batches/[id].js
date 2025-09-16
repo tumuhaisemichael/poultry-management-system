@@ -7,6 +7,7 @@ import ExpenseForm from "../../components/expenses/ExpenseForm";
 import EarningForm from "../../components/earnings/EarningForm";
 import SubtractionForm from "../../components/earnings/SubtractionForm";
 import DetailsOverlay from "../../components/DetailsOverlay";
+import DownloadButton from "../../components/batches/DownloadButton";
 import { formatCurrency } from "../../lib/currency";
 
 export default function BatchDetail() {
@@ -209,14 +210,17 @@ const handleDeleteEarning = async (earningId) => {
                 {batch.endDate && ` • Ended: ${new Date(batch.endDate).toLocaleDateString()}`}
               </p>
             </div>
-            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-              batch.status === "IN_PROGRESS" ? "bg-blue-100 text-blue-800" :
-              batch.status === "SOLD" ? "bg-green-100 text-green-800" :
-              batch.status === "COMPLETED" ? "bg-gray-100 text-gray-800" :
-              "bg-red-100 text-red-800"
-            }`}>
-              {batch.status.replace("_", " ")}
-            </span>
+            <div className="flex items-center gap-4">
+              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                batch.status === "IN_PROGRESS" ? "bg-blue-100 text-blue-800" :
+                batch.status === "SOLD" ? "bg-green-100 text-green-800" :
+                batch.status === "COMPLETED" ? "bg-gray-100 text-gray-800" :
+                "bg-red-100 text-red-800"
+              }`}>
+                {batch.status.replace("_", " ")}
+              </span>
+              <DownloadButton batchData={batch} />
+            </div>
           </div>
 
           {batch.notes && (
