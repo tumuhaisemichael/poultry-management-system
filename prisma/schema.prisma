@@ -59,10 +59,10 @@ model Expense {
   quantity        Float
   costPerUnit     Float
   total           Float
-  category        ExpenseCategory
+  category        String
   isRecurring     Boolean   @default(false)
-  attachment      String?
-  attachmentName  String?
+  receipt         String? // URL to uploaded receipt
+
   batchId         String
   batch           Batch     @relation(fields: [batchId], references: [id], onDelete: Cascade)
   createdAt       DateTime  @default(now())
@@ -74,22 +74,14 @@ model Expense {
   @@map("expenses")
 }
 
-enum ExpenseCategory {
-  FEED
-  VACCINES
-  EQUIPMENT
-  MISCELLANEOUS
-}
-
 model Earning {
   id              String    @id @default(cuid())
   itemName        String
   quantity        Float
   amountPerUnit   Float
   total           Float
-  category        EarningCategory
-  attachment      String?
-  attachmentName  String?
+  category        String
+
   batchId         String
   batch           Batch     @relation(fields: [batchId], references: [id], onDelete: Cascade)
   createdAt       DateTime  @default(now())
@@ -97,10 +89,4 @@ model Earning {
   transactionDate DateTime?
 
   @@map("earnings")
-}
-
-enum EarningCategory {
-  CHICKEN_SALES
-  EGG_SALES
-  BY_PRODUCTS
 }

@@ -11,7 +11,11 @@ export default async function handler(req, res) {
 
   if (req.method === "POST") {
     try {
-      const { itemName, quantity, costPerUnit, total, category, isRecurring, batchId, attachment, attachmentName } = req.body;
+      const {
+        itemName, quantity, costPerUnit, total, category, isRecurring, batchId,
+        transactionDate, weekOfGiving, unit
+      } = req.body;
+
 
       // Verify user owns the batch
       const batch = await prisma.batch.findFirst({
@@ -34,8 +38,10 @@ export default async function handler(req, res) {
           category,
           isRecurring,
           batchId,
-          attachment,
-          attachmentName,
+          transactionDate: transactionDate ? new Date(transactionDate) : null,
+          weekOfGiving,
+          unit,
+
         },
       });
 

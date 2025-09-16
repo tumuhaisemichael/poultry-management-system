@@ -13,7 +13,11 @@ export default async function handler(req, res) {
 
   if (req.method === "PUT") {
     try {
-      const { itemName, quantity, amountPerUnit, total, category, attachment, attachmentName } = req.body;
+      const {
+        itemName, quantity, amountPerUnit, total, category,
+        transactionDate
+      } = req.body;
+
 
       // Verify user owns the earning
       const earning = await prisma.earning.findFirst({
@@ -37,8 +41,8 @@ export default async function handler(req, res) {
           amountPerUnit,
           total,
           category,
-          attachment,
-          attachmentName,
+          transactionDate: transactionDate ? new Date(transactionDate) : null,
+
         },
       });
 

@@ -62,8 +62,40 @@ export default async function handler(req, res) {
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
+  } else if (req.method === "PUT") {
+    try {
+      const { name, status, startDate, endDate, notes } = req.body;
+      const updatedBatch = await prisma.batch.update({
+        where: {
+          id,
+          userId: session.user.id,
+        },
+        data: {
+          name,
+          status,
+          startDate,
+          endDate,
+          notes,
+        },
+      });
+      res.status(200).json(updatedBatch);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  } else if (req.method === "DELETE") {
+    try {
+      await prisma.batch.delete({
+        where: {
+          id,
+          userId: session.user.id,
+        },
+      });
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
   } else {
-    res.setHeader("Allow", ["GET"]);
+    res.setHeader("Allow", ["GET", "PUT", "DELETE"]);
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }
