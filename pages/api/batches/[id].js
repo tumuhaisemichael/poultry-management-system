@@ -20,9 +20,7 @@ export default async function handler(req, res) {
         batch = await prisma.batch.findUnique({
           where: {
             id,
-            user: {
-              id: session.user.id,
-            },
+            userId: session.user.id,
           },
           include: {
             expenses: true,
