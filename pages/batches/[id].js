@@ -55,8 +55,13 @@ const handleEarningUpdated = (updatedEarning) => {
   const fetchBatch = async () => {
     try {
       const res = await fetch(`/api/batches/${id}`);
-      const data = await res.json();
-      setBatch(data);
+      if (res.ok) {
+        const data = await res.json();
+        setBatch(data);
+      } else {
+        setBatch(null);
+        console.error("Failed to fetch batch:", res.status, res.statusText);
+      }
     } catch (error) {
       console.error("Error fetching batch:", error);
     } finally {
