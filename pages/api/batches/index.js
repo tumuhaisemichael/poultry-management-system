@@ -14,6 +14,11 @@ export default async function handler(req, res) {
       let batches;
       if (session.user.role === "ADMIN") {
         batches = await prisma.batch.findMany({
+          where: {
+            user: {
+              id: session.user.id,
+            },
+          },
           include: {
             expenses: true,
             earnings: true,
@@ -26,10 +31,6 @@ export default async function handler(req, res) {
         batches = await prisma.batch.findMany({
           where: {
             userId: session.user.id,
-          },
-          include: {
-            expenses: true,
-            earnings: true,
           },
           orderBy: {
             createdAt: "desc",
